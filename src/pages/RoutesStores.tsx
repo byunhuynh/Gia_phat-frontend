@@ -121,7 +121,7 @@ const CheckInCameraModal: React.FC<{
     const fetchServerTime = async () => {
       try {
         const fetchStart = Date.now();
-        const res = await fetch("https://api.nhatminhvn.com/server-time");
+        const res = await fetch(`${API_BASE}/server-time`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         const fetchEnd = Date.now();
