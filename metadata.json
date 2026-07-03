@@ -1,0 +1,5 @@
+{
+  "name": "Gia Phát Group Consumer",
+  "description": "Hệ thống quản lý phân phối chuyên nghiệp: Quản lý tuyến, điểm bán, lên đơn hàng và báo cáo doanh số.",
+  "requestFramePermissions": ["geolocation"]
+}

@@ -1,0 +1,13 @@
+{
+  "folders": [
+	{
+		"path": "../../Source Code/dump vibe"
+	},
+	{
+		"path": ".."
+	}
+],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "nhatminh"
+  }
+}
