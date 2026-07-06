@@ -1,4 +1,4 @@
-export const API_BASE = "http://103.82.24.72";
+export const API_BASE = "https://api.giaphat.io.vn";
 
 import type { Role } from "../types";
 export type { Role };
