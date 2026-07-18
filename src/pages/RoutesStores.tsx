@@ -746,7 +746,9 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     null,
   );
   const [editRouteNameValue, setEditRouteNameValue] = useState("");
-  const [editVehicleIdValue, setEditVehicleIdValue] = useState<string | number>("");
+  const [editVehicleIdValue, setEditVehicleIdValue] = useState<string | number>(
+    "",
+  );
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   const [districts, setDistricts] = useState<LocationItem[]>([]);
@@ -1170,7 +1172,14 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     fetchUsers();
     fetchProvinces();
     if (viewMode === "history") fetchGlobalHistory();
-  }, [fetchRoutes, fetchVehicles, fetchUsers, fetchGlobalHistory, viewMode, fetchProvinces]);
+  }, [
+    fetchRoutes,
+    fetchVehicles,
+    fetchUsers,
+    fetchGlobalHistory,
+    viewMode,
+    fetchProvinces,
+  ]);
 
   // Auto-select tuyến khi điều hướng từ thông báo
   useEffect(() => {
@@ -2432,7 +2441,7 @@ group relative
                       onChange={(e) =>
                         setRouteForm({ ...routeForm, name: e.target.value })
                       }
-                      placeholder="VD: Tuyến Quận 1 - Thứ 2"
+                      placeholder="VD: Tuyến Châu Thành"
                       className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner"
                     />
                   </div>
@@ -2494,10 +2503,12 @@ group relative
                       value={routeForm.province_name}
                       disabled
                       onChange={() => undefined}
-                      options={[{
-                        label: FIXED_ROUTE_PROVINCE,
-                        value: FIXED_ROUTE_PROVINCE,
-                      }]}
+                      options={[
+                        {
+                          label: FIXED_ROUTE_PROVINCE,
+                          value: FIXED_ROUTE_PROVINCE,
+                        },
+                      ]}
                       placeholder={FIXED_ROUTE_PROVINCE}
                     />
                   </div>
@@ -2508,7 +2519,9 @@ group relative
                   </label>
                   <Dropdown
                     value={routeForm.vehicle_id}
-                    onChange={(value) => setRouteForm({ ...routeForm, vehicle_id: value })}
+                    onChange={(value) =>
+                      setRouteForm({ ...routeForm, vehicle_id: value })
+                    }
                     options={[
                       { label: "Không gán xe", value: "" },
                       ...vehicles.map((vehicle) => ({
