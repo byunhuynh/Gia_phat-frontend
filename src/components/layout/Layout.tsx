@@ -51,6 +51,12 @@ const DashboardLayout: React.FC<LayoutProps> = ({
     { path: "/routes", label: "Tuyến & Điểm bán", icon: "fa-map-location-dot" },
     { path: "/orders", label: "Lên đơn hàng", icon: "fa-cart-plus" },
     {
+      path: "/order-list",
+      label: "Danh sách đơn hàng",
+      icon: "fa-file-invoice",
+      roles: ["admin", "accountant"],
+    },
+    {
       path: "/reports",
       label: "Báo cáo doanh số",
       icon: "fa-file-invoice-dollar",
