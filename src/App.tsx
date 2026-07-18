@@ -14,6 +14,7 @@ import RoutesStoresPage from "./pages/RoutesStores";
 import OrderCreatePage from "./pages/OrderCreate";
 import ReportsPage from "./pages/Reports";
 import ProductManagement from "./pages/ProductManagement";
+import VehicleManagement from "./pages/VehicleManagement";
 import AdminPanel from "./pages/AdminPanel";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import InstallPromptBanner from "./components/common/InstallPromptBanner";
@@ -168,6 +169,14 @@ const AppInner: React.FC = () => {
             element={
               <ProtectedRoute user={user} allowedRoles={["admin"]}>
                 <ProductManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vehicles"
+            element={
+              <ProtectedRoute user={user} allowedRoles={["admin"]}>
+                <VehicleManagement />
               </ProtectedRoute>
             }
           />

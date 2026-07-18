@@ -26,10 +26,18 @@ export interface RouteItem {
   code: string;
   name: string;
   province_name: string;
+  vehicle_id?: number | null;
+  vehicle_code?: string | null;
   vehicle_plate?: string | null;
   staff_id: number;
   staffFullName?: string; // New field for assigned staff's full name
   store_count?: number;
+}
+
+export interface Vehicle {
+  id: number;
+  code: string;
+  plate_number: string;
 }
 
 export interface StoreItem {

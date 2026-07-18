@@ -13,6 +13,7 @@ import {
   CheckInRecord,
   User,
   GlobalCheckInRecord,
+  Vehicle,
 } from "../types";
 import { useLocation } from "react-router-dom";
 import { API_BASE, LOGO_URL, ROLE_HIERARCHY, ROLE_LABELS } from "../constants";
@@ -745,7 +746,8 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     null,
   );
   const [editRouteNameValue, setEditRouteNameValue] = useState("");
-  const [editVehiclePlateValue, setEditVehiclePlateValue] = useState("");
+  const [editVehicleIdValue, setEditVehicleIdValue] = useState<string | number>("");
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   const [districts, setDistricts] = useState<LocationItem[]>([]);
   const [wards, setWards] = useState<LocationItem[]>([]);
@@ -759,7 +761,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     name: "",
     code: "",
     province_name: FIXED_ROUTE_PROVINCE,
-    vehicle_plate: "",
+    vehicle_id: "" as string | number,
     staff_id: "" as string | number,
   });
 
@@ -916,6 +918,15 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
       showToast("Lỗi tải danh sách tuyến", "danger");
     } finally {
       setLoading(false);
+    }
+  }, [showToast]);
+
+  const fetchVehicles = useCallback(async () => {
+    try {
+      const res = await apiFetchWithRefresh("/vehicles");
+      if (res.ok) setVehicles(await res.json());
+    } catch {
+      showToast("Lỗi tải danh sách xe", "danger");
     }
   }, [showToast]);
 
@@ -1155,10 +1166,11 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
 
   useEffect(() => {
     fetchRoutes();
+    fetchVehicles();
     fetchUsers();
     fetchProvinces();
     if (viewMode === "history") fetchGlobalHistory();
-  }, [fetchRoutes, fetchUsers, fetchGlobalHistory, viewMode, fetchProvinces]);
+  }, [fetchRoutes, fetchVehicles, fetchUsers, fetchGlobalHistory, viewMode, fetchProvinces]);
 
   // Auto-select tuyến khi điều hướng từ thông báo
   useEffect(() => {
@@ -1389,7 +1401,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           route_name: editRouteNameValue.trim(),
-          vehicle_plate: editVehiclePlateValue.trim().toUpperCase() || null,
+          vehicle_id: editVehicleIdValue || null,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -1400,6 +1412,8 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
       showToast("Đã cập nhật tuyến", "success");
       const updated = {
         name: json.route_name || editRouteNameValue.trim(),
+        vehicle_id: json.vehicle_id || null,
+        vehicle_code: json.vehicle_code || null,
         vehicle_plate: json.vehicle_plate || null,
       };
       setRoutes((prev) =>
@@ -1410,7 +1424,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
       if (selectedRoute?.id === editingRouteName.id)
         setSelectedRoute((prev) => (prev ? { ...prev, ...updated } : prev));
       setEditingRouteName(null);
-      setEditVehiclePlateValue("");
+      setEditVehicleIdValue("");
     } catch {
       showToast("Lỗi kết nối", "danger");
     } finally {
@@ -1438,7 +1452,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
         route_code: routeForm.code.toUpperCase(),
         route_name: routeForm.name,
         province_name: routeForm.province_name,
-        vehicle_plate: routeForm.vehicle_plate,
+        vehicle_id: routeForm.vehicle_id || null,
         user_id: routeForm.staff_id,
       };
 
@@ -1457,7 +1471,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
           name: "",
           code: generateRouteCodeFromProvince(FIXED_ROUTE_PROVINCE),
           province_name: FIXED_ROUTE_PROVINCE,
-          vehicle_plate: "",
+          vehicle_id: "",
           staff_id: currentUser.id,
         });
         fetchRoutes();
@@ -1614,7 +1628,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
                       name: "",
                       code: generateRouteCodeFromProvince(FIXED_ROUTE_PROVINCE),
                       province_name: FIXED_ROUTE_PROVINCE,
-                      vehicle_plate: "",
+                      vehicle_id: "",
                       staff_id: currentUser.id,
                     });
 
@@ -2052,9 +2066,7 @@ group relative
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditRouteNameValue(route.name);
-                                  setEditVehiclePlateValue(
-                                    route.vehicle_plate || "",
-                                  );
+                                  setEditVehicleIdValue(route.vehicle_id || "");
                                   setEditingRouteName(route);
                                 }}
                                 className="w-8 h-8 bg-slate-50 dark:bg-slate-700 text-slate-400 hover:bg-nm/10 hover:text-nm rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
@@ -2492,25 +2504,21 @@ group relative
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-                    Biển số xe
+                    Xe phụ trách
                   </label>
-                  <div className="relative group">
-                    <span className="absolute inset-y-0 left-0 w-12 flex items-center justify-center text-slate-300 group-focus-within:text-nm transition-colors pointer-events-none">
-                      <i className="fa-solid fa-car text-sm"></i>
-                    </span>
-                    <input
-                      type="text"
-                      value={routeForm.vehicle_plate}
-                      onChange={(e) =>
-                        setRouteForm({
-                          ...routeForm,
-                          vehicle_plate: e.target.value.toUpperCase(),
-                        })
-                      }
-                      placeholder="VD: 29A12345"
-                      className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner"
-                    />
-                  </div>
+                  <Dropdown
+                    value={routeForm.vehicle_id}
+                    onChange={(value) => setRouteForm({ ...routeForm, vehicle_id: value })}
+                    options={[
+                      { label: "Không gán xe", value: "" },
+                      ...vehicles.map((vehicle) => ({
+                        label: `${vehicle.code} · ${vehicle.plate_number}`,
+                        value: vehicle.id,
+                      })),
+                    ]}
+                    placeholder="Chọn xe trong danh sách"
+                    searchable
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
@@ -3340,29 +3348,28 @@ group relative
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-                      Biển số xe
+                      Xe phụ trách
                     </label>
-                    <div className="relative group">
-                      <span className="absolute inset-y-0 left-0 w-12 flex items-center justify-center text-slate-300 group-focus-within:text-nm transition-colors pointer-events-none">
-                        <i className="fa-solid fa-car text-sm"></i>
-                      </span>
-                      <input
-                        type="text"
-                        value={editVehiclePlateValue}
-                        onChange={(e) =>
-                          setEditVehiclePlateValue(e.target.value.toUpperCase())
-                        }
-                        placeholder="VD: 29A12345"
-                        disabled={submitting}
-                        className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner disabled:opacity-50"
-                      />
-                    </div>
+                    <Dropdown
+                      value={editVehicleIdValue}
+                      disabled={submitting}
+                      onChange={setEditVehicleIdValue}
+                      options={[
+                        { label: "Không gán xe", value: "" },
+                        ...vehicles.map((vehicle) => ({
+                          label: `${vehicle.code} · ${vehicle.plate_number}`,
+                          value: vehicle.id,
+                        })),
+                      ]}
+                      placeholder="Chọn xe trong danh sách"
+                      searchable
+                    />
                   </div>
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => {
                         setEditingRouteName(null);
-                        setEditVehiclePlateValue("");
+                        setEditVehicleIdValue("");
                       }}
                       disabled={submitting}
                       className="flex-1 py-4 bg-slate-100 dark:bg-slate-700 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 transition-all active:scale-95 disabled:opacity-50"

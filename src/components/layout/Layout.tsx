@@ -61,6 +61,12 @@ const DashboardLayout: React.FC<LayoutProps> = ({
       icon: "fa-boxes-stacked",
       roles: ["admin"],
     },
+    {
+      path: "/vehicles",
+      label: "Quản lý xe",
+      icon: "fa-truck",
+      roles: ["admin"],
+    },
     { path: "/staff", label: "Đội ngũ Sales", icon: "fa-users-gear" },
     {
       path: "/admin",
