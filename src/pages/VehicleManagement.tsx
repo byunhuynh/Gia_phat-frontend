@@ -11,6 +11,7 @@ interface VehicleStore {
   phone?: string;
   route_code: string;
   route_name: string;
+  staff_name: string;
 }
 
 const VehicleManagement: React.FC = () => {
@@ -208,6 +209,10 @@ const VehicleManagement: React.FC = () => {
                     <div className="sm:text-right">
                       <div className="text-xs font-black text-nm">{store.route_name}</div>
                       <div className="text-[10px] text-slate-400 mt-1">{store.route_code}{store.phone ? ` · ${store.phone}` : ""}</div>
+                      <div className="text-[10px] font-bold text-slate-500 dark:text-slate-300 mt-1">
+                        <i className="fa-solid fa-user-tie mr-1 text-nm" />
+                        Phụ trách: {store.staff_name || "Chưa xác định"}
+                      </div>
                     </div>
                   </div>
                 ))}
