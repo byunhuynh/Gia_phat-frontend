@@ -1689,7 +1689,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
                 </button>
               )}
 
-              {ROLE_HIERARCHY[currentUser.role] < ROLE_HIERARCHY["sales"] &&
+              {ROLE_HIERARCHY[currentUser.role] <= ROLE_HIERARCHY["regional_director"] &&
                 viewMode !== "history" && (
                   <button
                     onClick={() => {
@@ -2084,8 +2084,8 @@ group relative
                                 <i className="fa-solid fa-pen text-xs"></i>
                               </button>
                             )}
-                            {ROLE_HIERARCHY[currentUser.role] <
-                              ROLE_HIERARCHY["sales"] && (
+                            {ROLE_HIERARCHY[currentUser.role] <=
+                              ROLE_HIERARCHY["director"] && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -2290,8 +2290,8 @@ group relative
                                 <i className="fa-solid fa-pen text-xs"></i>
                               </button>
                             )}
-                            {ROLE_HIERARCHY[currentUser.role] <
-                              ROLE_HIERARCHY["sales"] && (
+                            {ROLE_HIERARCHY[currentUser.role] <=
+                              ROLE_HIERARCHY["regional_director"] && (
                               <button
                                 onClick={() => setConfirmingDeleteStore(store)}
                                 className="h-9 w-9 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-300 hover:bg-rose-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all"
@@ -2385,8 +2385,8 @@ group relative
                                 <i className="fa-solid fa-pen"></i>
                               </button>
                             )}
-                            {ROLE_HIERARCHY[currentUser.role] <
-                              ROLE_HIERARCHY["sales"] && (
+                            {ROLE_HIERARCHY[currentUser.role] <=
+                              ROLE_HIERARCHY["regional_director"] && (
                               <button
                                 onClick={() => setConfirmingDeleteStore(store)}
                                 className="flex items-center justify-center bg-rose-50 dark:bg-rose-900/20 text-rose-400 font-black px-4 py-3 rounded-xl text-[11px] uppercase tracking-wider active:scale-95 transition-all hover:bg-rose-500 hover:text-white"
