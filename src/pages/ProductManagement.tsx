@@ -149,12 +149,21 @@ const ProductManagement: React.FC = () => {
     fetchCategories();
   }, []);
 
-  const baseUnitOptions = [
-    { id: "Chai", name: "Chai" },
-    { id: "Túi", name: "Túi" },
-    { id: "Hộp", name: "Hộp" },
-    { id: "Can", name: "Can" },
-  ];
+  const baseUnitOptions = useMemo(() => {
+    const units = new Map<string, string>();
+
+    ["Chai", "Túi", "Hộp", "Can"].forEach((unit) =>
+      units.set(unit.toLocaleLowerCase("vi-VN"), unit),
+    );
+    products.forEach((product) => {
+      const unit = product.base_unit?.trim();
+      if (unit) units.set(unit.toLocaleLowerCase("vi-VN"), unit);
+    });
+
+    return Array.from(units.values())
+      .sort((a, b) => a.localeCompare(b, "vi"))
+      .map((unit) => ({ id: unit, name: unit }));
+  }, [products]);
 
   const [formData, setFormData] = useState({
     sku: "",
@@ -296,6 +305,14 @@ const ProductManagement: React.FC = () => {
     try {
       let categoryId = String(formData.category_id || "");
       let brandId = String(formData.brand_id || "");
+      const baseUnit = String(formData.base_unit || "")
+        .replace(/^__new__/, "")
+        .trim();
+
+      if (!baseUnit) {
+        showToast("Vui lòng chọn hoặc tạo đơn vị bán lẻ", "warning");
+        return;
+      }
 
       // ===== CREATE CATEGORY =====
       if (categoryId.startsWith("__new__")) {
@@ -337,7 +354,7 @@ const ProductManagement: React.FC = () => {
         name: formData.name,
         brand_id: Number(brandId),
         category_id: Number(categoryId),
-        base_unit: formData.base_unit || null,
+        base_unit: baseUnit,
         case_unit: "Thùng",
         units_per_case: formData.units_per_case
           ? Number(formData.units_per_case)
@@ -983,6 +1000,7 @@ const ProductManagement: React.FC = () => {
                     options={baseUnitOptions}
                     value={formData.base_unit}
                     icon="fa-scale-balanced"
+                    allowCreate
                     onChange={(id) =>
                       setFormData({ ...formData, base_unit: id })
                     }
