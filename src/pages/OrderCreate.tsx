@@ -4,20 +4,6 @@ import { API_BASE } from "../constants";
 import { useToast } from "../hooks/useToast";
 import { useLocation } from "react-router-dom";
 
-const BYPASS_CHECKIN_ROLES = new Set(["regional_director", "director", "admin"]);
-
-const getUserRole = (): string => {
-  const token =
-    localStorage.getItem("access_token") ||
-    sessionStorage.getItem("access_token");
-  if (!token) return "sales";
-  try {
-    return JSON.parse(atob(token.split(".")[1])).role ?? "sales";
-  } catch {
-    return "sales";
-  }
-};
-
 interface OrderItem {
   id: string;
   productName: string;
@@ -424,10 +410,8 @@ const OrderCreatePage: React.FC = () => {
 
   const location = useLocation();
 
-  const isPrivileged = BYPASS_CHECKIN_ROLES.has(getUserRole());
-
-  // Chế độ ngoại tuyến: tìm kiếm tất cả điểm bán (chỉ dành cho regional_director+)
-  const [offlineMode, setOfflineMode] = useState(false);
+  // Mọi tài khoản đều có thể lên đơn trực tiếp, không cần check-in.
+  const offlineMode = true;
   const [storeSearchQuery, setStoreSearchQuery] = useState("");
   const [storeSearchResults, setStoreSearchResults] = useState<any[]>([]);
   const [loadingStoreSearch, setLoadingStoreSearch] = useState(false);
@@ -831,24 +815,10 @@ const OrderCreatePage: React.FC = () => {
                 </h3>
                 {offlineMode && (
                   <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                    Đơn ngoại tuyến · không cần check-in
+                    Lên đơn trực tiếp · không cần check-in
                   </span>
                 )}
               </div>
-              {isPrivileged && (
-                <button
-                  type="button"
-                  onClick={() => setOfflineMode((v) => !v)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${
-                    offlineMode
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/30"
-                      : "bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-indigo-300"
-                  }`}
-                >
-                  <i className={`fa-solid ${offlineMode ? "fa-toggle-on" : "fa-toggle-off"}`}></i>
-                  {offlineMode ? "Đang ngoại tuyến" : "Đặt sỉ / ngoại tuyến"}
-                </button>
-              )}
             </div>
 
             {offlineMode ? (
