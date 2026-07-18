@@ -50,6 +50,7 @@ const ProductManagement: React.FC = () => {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageVersion, setImageVersion] = useState(() => Date.now());
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -173,15 +174,19 @@ const ProductManagement: React.FC = () => {
 
   const buildImageUrl = (path?: string) => {
     if (!path) return null;
-    return path.startsWith("http")
+    const baseUrl = path.startsWith("http")
       ? path
       : `${API_BASE.replace(/\/$/, "")}${path}`;
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}v=${imageVersion}`;
   };
 
   const handleOpenModal = (item: Product | null = null) => {
     if (item) {
       setEditingItem(item);
-      setImagePreview(item.image_url ? `${API_BASE}${item.image_url}` : null);
+      setImagePreview(
+        item.image_url ? buildImageUrl(item.image_url) || null : null,
+      );
       setImageFile(null);
 
       setFormData({
