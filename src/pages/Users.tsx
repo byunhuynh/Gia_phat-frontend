@@ -70,6 +70,7 @@ const ModalPortal = ({
 };
 
 const ROLE_PREFIX: Record<Role, string> = {
+  accountant: "KT",
   admin: "ADM",
   director: "RSM",
   regional_director: "ASM",
@@ -634,6 +635,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ currentUser }) => {
   const groupedUsers = useMemo(() => {
     const roles: Role[] = [
       "admin",
+      "accountant",
       "director",
       "regional_director",
       "supervisor",
@@ -722,7 +724,9 @@ const UsersPage: React.FC<UsersPageProps> = ({ currentUser }) => {
     if (!currentUser) return [];
     const myRank = ROLE_HIERARCHY[currentUser.role];
     return (Object.keys(ROLE_HIERARCHY) as Role[]).filter(
-      (role) => ROLE_HIERARCHY[role] > myRank,
+      (role) =>
+        ROLE_HIERARCHY[role] > myRank &&
+        (role !== "accountant" || currentUser.role === "admin"),
     );
   }, [currentUser]);
 
@@ -730,6 +734,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ currentUser }) => {
     if (!currentUser || !formData.role) return [];
     const newUserRank = ROLE_HIERARCHY[formData.role as Role];
     return users.filter((u) => {
+      if (formData.role === "accountant") return u.role === "admin";
       const managerRank = ROLE_HIERARCHY[u.role];
       return managerRank < newUserRank && u.id !== editingUser?.id;
     });

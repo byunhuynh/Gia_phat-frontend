@@ -9,9 +9,11 @@ export const ROLE_HIERARCHY: Record<Role, number> = {
   regional_director: 2,
   supervisor: 3,
   sales: 4,
+  accountant: 5,
 };
 
 export const ROLE_LABELS: Record<string, string> = {
+  accountant: "Kế toán",
   sales: "Nhân viên thị trường",
   supervisor: "Giám sát kinh doanh",
   regional_director: "Giám đốc khu vực",
@@ -20,6 +22,8 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const ROLE_COLORS: Record<string, string> = {
+  accountant:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   admin: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
   director:
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",

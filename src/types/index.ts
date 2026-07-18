@@ -1,4 +1,5 @@
 export type Role =
+  | "accountant"
   | "sales"
   | "supervisor"
   | "regional_director"
