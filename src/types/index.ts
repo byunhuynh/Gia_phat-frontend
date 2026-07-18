@@ -26,6 +26,7 @@ export interface RouteItem {
   code: string;
   name: string;
   province_name: string;
+  vehicle_plate?: string | null;
   staff_id: number;
   staffFullName?: string; // New field for assigned staff's full name
   store_count?: number;

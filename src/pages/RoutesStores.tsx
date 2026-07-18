@@ -736,6 +736,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
   const [editPhoneValue, setEditPhoneValue] = useState("");
   const [editingRouteName, setEditingRouteName] = useState<RouteItem | null>(null);
   const [editRouteNameValue, setEditRouteNameValue] = useState("");
+  const [editVehiclePlateValue, setEditVehiclePlateValue] = useState("");
 
   const [districts, setDistricts] = useState<LocationItem[]>([]);
   const [wards, setWards] = useState<LocationItem[]>([]);
@@ -749,6 +750,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     name: "",
     code: "",
     province_name: "",
+    vehicle_plate: "",
     staff_id: "" as string | number,
   });
 
@@ -1319,7 +1321,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
     }
   };
 
-  const handleUpdateRouteName = async () => {
+  const handleUpdateRoute = async () => {
     if (!editingRouteName) return;
     if (!editRouteNameValue.trim()) {
       showToast("Vui lòng nhập tên tuyến", "warning");
@@ -1330,15 +1332,22 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
       const res = await apiFetchWithRefresh(`/routes/${editingRouteName.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ route_name: editRouteNameValue.trim() }),
+        body: JSON.stringify({
+          route_name: editRouteNameValue.trim(),
+          vehicle_plate: editVehiclePlateValue.trim().toUpperCase() || null,
+        }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) { showToast(json.message || "Lỗi đổi tên tuyến", "danger"); return; }
-      showToast("Đã đổi tên tuyến", "success");
-      const updated = editRouteNameValue.trim();
-      setRoutes(prev => prev.map(r => r.id === editingRouteName.id ? { ...r, name: updated } : r));
-      if (selectedRoute?.id === editingRouteName.id) setSelectedRoute(prev => prev ? { ...prev, name: updated } : prev);
+      if (!res.ok) { showToast(json.message || "Lỗi cập nhật tuyến", "danger"); return; }
+      showToast("Đã cập nhật tuyến", "success");
+      const updated = {
+        name: json.route_name || editRouteNameValue.trim(),
+        vehicle_plate: json.vehicle_plate || null,
+      };
+      setRoutes(prev => prev.map(r => r.id === editingRouteName.id ? { ...r, ...updated } : r));
+      if (selectedRoute?.id === editingRouteName.id) setSelectedRoute(prev => prev ? { ...prev, ...updated } : prev);
       setEditingRouteName(null);
+      setEditVehiclePlateValue("");
     } catch {
       showToast("Lỗi kết nối", "danger");
     } finally {
@@ -1366,6 +1375,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
         route_code: routeForm.code.toUpperCase(),
         route_name: routeForm.name,
         province_name: routeForm.province_name,
+        vehicle_plate: routeForm.vehicle_plate,
         user_id: routeForm.staff_id,
       };
 
@@ -1384,6 +1394,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
           name: "",
           code: "",
           province_name: "",
+          vehicle_plate: "",
           staff_id: currentUser.id,
         });
         fetchRoutes();
@@ -1563,6 +1574,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
                       ? generateRouteCodeFromProvince(province)
                       : "",
                     province_name: province,
+                    vehicle_plate: "",
                     staff_id: currentUser.id,
                   });
 
@@ -1982,9 +1994,9 @@ group relative
                         <div className="flex items-center gap-2">
                           {ROLE_HIERARCHY[currentUser.role] <= ROLE_HIERARCHY["sales"] && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); setEditRouteNameValue(route.name); setEditingRouteName(route); }}
+                              onClick={(e) => { e.stopPropagation(); setEditRouteNameValue(route.name); setEditVehiclePlateValue(route.vehicle_plate || ""); setEditingRouteName(route); }}
                               className="w-8 h-8 bg-slate-50 dark:bg-slate-700 text-slate-400 hover:bg-nm/10 hover:text-nm rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-                              title="Đổi tên tuyến"
+                              title="Chỉnh sửa tuyến"
                             >
                               <i className="fa-solid fa-pen text-xs"></i>
                             </button>
@@ -2020,6 +2032,15 @@ group relative
                           </span>
                           <span className="text-xs font-bold text-nm">
                             {getStaffName(route.staff_id)}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black text-slate-400 uppercase">
+                            Biển số xe
+                          </span>
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                            {route.vehicle_plate || "—"}
                           </span>
                         </div>
 
@@ -2396,6 +2417,23 @@ group relative
                     }))}
                     placeholder="Chọn tỉnh thành"
                     searchable
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                  Biển số xe
+                </label>
+                <div className="relative group">
+                  <span className="absolute inset-y-0 left-0 w-12 flex items-center justify-center text-slate-300 group-focus-within:text-nm transition-colors pointer-events-none">
+                    <i className="fa-solid fa-car text-sm"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={routeForm.vehicle_plate}
+                    onChange={(e) => setRouteForm({ ...routeForm, vehicle_plate: e.target.value.toUpperCase() })}
+                    placeholder="VD: 29A12345"
+                    className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -3067,7 +3105,7 @@ group relative
                   <div className="w-10 h-10 rounded-2xl bg-nm/10 flex items-center justify-center">
                     <i className="fa-solid fa-pen text-sm"></i>
                   </div>
-                  Đổi tên tuyến
+                  Chỉnh sửa tuyến
                 </h3>
                 <button onClick={() => setEditingRouteName(null)} disabled={submitting} className="text-slate-300 hover:text-slate-500 transition-colors disabled:opacity-40">
                   <i className="fa-solid fa-circle-xmark text-2xl"></i>
@@ -3078,7 +3116,7 @@ group relative
                   Tuyến hiện tại: <span className="font-black text-slate-700 dark:text-white">{editingRouteName.name}</span>
                 </p>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tên mới *</label>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tên tuyến *</label>
                   <div className="relative group">
                     <span className="absolute inset-y-0 left-0 w-12 flex items-center justify-center text-slate-300 group-focus-within:text-nm transition-colors pointer-events-none">
                       <i className="fa-solid fa-signature text-sm"></i>
@@ -3087,8 +3125,24 @@ group relative
                       type="text"
                       value={editRouteNameValue}
                       onChange={(e) => setEditRouteNameValue(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleUpdateRouteName(); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleUpdateRoute(); }}
                       placeholder="Nhập tên tuyến mới"
+                      disabled={submitting}
+                      className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Biển số xe</label>
+                  <div className="relative group">
+                    <span className="absolute inset-y-0 left-0 w-12 flex items-center justify-center text-slate-300 group-focus-within:text-nm transition-colors pointer-events-none">
+                      <i className="fa-solid fa-car text-sm"></i>
+                    </span>
+                    <input
+                      type="text"
+                      value={editVehiclePlateValue}
+                      onChange={(e) => setEditVehiclePlateValue(e.target.value.toUpperCase())}
+                      placeholder="VD: 29A12345"
                       disabled={submitting}
                       className="w-full pl-12 pr-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-nm focus:bg-white dark:focus:bg-slate-800 font-bold outline-none text-base transition-all shadow-inner disabled:opacity-50"
                     />
@@ -3096,18 +3150,18 @@ group relative
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
-                    onClick={() => setEditingRouteName(null)}
+                    onClick={() => { setEditingRouteName(null); setEditVehiclePlateValue(""); }}
                     disabled={submitting}
                     className="flex-1 py-4 bg-slate-100 dark:bg-slate-700 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 transition-all active:scale-95 disabled:opacity-50"
                   >
                     Hủy
                   </button>
                   <button
-                    onClick={handleUpdateRouteName}
+                    onClick={handleUpdateRoute}
                     disabled={submitting || !editRouteNameValue.trim()}
                     className="flex-1 py-4 bg-nm text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-lg shadow-nm/25 hover:bg-nm-hover transition-all active:scale-95 disabled:opacity-50"
                   >
-                    {submitting ? <i className="fa-solid fa-spinner animate-spin"></i> : "Lưu tên"}
+                    {submitting ? <i className="fa-solid fa-spinner animate-spin"></i> : "Lưu"}
                   </button>
                 </div>
               </div>
