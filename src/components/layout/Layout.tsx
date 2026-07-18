@@ -171,7 +171,7 @@ const DashboardLayout: React.FC<LayoutProps> = ({
               ></i>
             </button>
             <h2 className="hidden md:block font-black uppercase text-slate-400 text-xs tracking-widest">
-              Sạch - Thơm - Lành
+              Gia Phát Consumer
             </h2>
           </div>
 
