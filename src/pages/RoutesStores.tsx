@@ -38,6 +38,8 @@ interface LocationItem {
 const normalizeProvinceName = (name: string) =>
   (name || "").replace(/^(Tỉnh|Thành phố)\s+/i, "").trim();
 
+const FIXED_ROUTE_PROVINCE = "Trà Vinh";
+
 interface TrashedRoute extends RouteItem {
   deleted_at: string;
   deleted_by_name?: string;
@@ -756,7 +758,7 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
   const [routeForm, setRouteForm] = useState({
     name: "",
     code: "",
-    province_name: "",
+    province_name: FIXED_ROUTE_PROVINCE,
     vehicle_plate: "",
     staff_id: "" as string | number,
   });
@@ -1453,8 +1455,8 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
         setIsRouteModalOpen(false);
         setRouteForm({
           name: "",
-          code: "",
-          province_name: "",
+          code: generateRouteCodeFromProvince(FIXED_ROUTE_PROVINCE),
+          province_name: FIXED_ROUTE_PROVINCE,
           vehicle_plate: "",
           staff_id: currentUser.id,
         });
@@ -1608,35 +1610,10 @@ const RoutesStoresPage: React.FC<RoutesStoresPageProps> = ({ currentUser }) => {
               {!selectedRoute && viewMode !== "history" && (
                 <button
                   onClick={() => {
-                    const isSales = currentUser.role === "sales";
-
-                    // Lấy province: ưu tiên currentUser.province, fallback sang allAccessibleUsers
-                    // (vì /me đôi khi không trả về province nếu chưa được cập nhật)
-                    const foundUser = allAccessibleUsers.find(
-                      (u) => String(u.id) === String(currentUser.id),
-                    );
-                    const rawProvince = isSales
-                      ? currentUser.province || foundUser?.province || ""
-                      : "";
-
-                    const matched = rawProvince
-                      ? provinces.find(
-                          (p: LocationItem) =>
-                            normalizeProvinceName(p.name).toLowerCase() ===
-                            normalizeProvinceName(rawProvince).toLowerCase(),
-                        )
-                      : null;
-                    // Luôn lưu dạng đã strip prefix để đồng nhất với DB
-                    const province = normalizeProvinceName(
-                      matched?.name ?? rawProvince,
-                    );
-
                     setRouteForm({
                       name: "",
-                      code: province
-                        ? generateRouteCodeFromProvince(province)
-                        : "",
-                      province_name: province,
+                      code: generateRouteCodeFromProvince(FIXED_ROUTE_PROVINCE),
+                      province_name: FIXED_ROUTE_PROVINCE,
                       vehicle_plate: "",
                       staff_id: currentUser.id,
                     });
@@ -2503,24 +2480,13 @@ group relative
 
                     <Dropdown
                       value={routeForm.province_name}
-                      disabled={currentUser.role === "sales"}
-                      onChange={(val) => {
-                        const normalized = normalizeProvinceName(val as string);
-                        const generatedCode =
-                          generateRouteCodeFromProvince(normalized);
-
-                        setRouteForm({
-                          ...routeForm,
-                          province_name: normalized,
-                          code: generatedCode,
-                        });
-                      }}
-                      options={provinces.map((p) => ({
-                        label: p.name,
-                        value: normalizeProvinceName(p.name),
-                      }))}
-                      placeholder="Chọn tỉnh thành"
-                      searchable
+                      disabled
+                      onChange={() => undefined}
+                      options={[{
+                        label: FIXED_ROUTE_PROVINCE,
+                        value: FIXED_ROUTE_PROVINCE,
+                      }]}
+                      placeholder={FIXED_ROUTE_PROVINCE}
                     />
                   </div>
                 </div>
